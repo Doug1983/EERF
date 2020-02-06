@@ -116,14 +116,42 @@ class Subject(models.Model):
     height = models.PositiveIntegerField(null=True, blank=True)
     birthday = models.DateField(null=True, blank=True)
     headsize = models.CharField(max_length=135, null=True, blank=True)
-    sex = EnumField(choices=(('unknown', 'unknown'), ('male', 'male'), ('female', 'female'), ('unspecified', 'unspecified')))
-    handedness = EnumField(choices=(('unknown', 'unknown'), ('right', 'right'), ('left', 'left'), ('equal', 'equal')))
-    smoking = EnumField(choices=(('unknown', 'unknown'), ('no', 'no'), ('yes', 'yes')))
-    alcohol_abuse = EnumField(choices=(('unknown', 'unknown'), ('no', 'no'), ('yes', 'yes')))
-    drug_abuse = EnumField(choices=(('unknown', 'unknown'), ('no', 'no'), ('yes', 'yes')))
-    medication = EnumField(choices=(('unknown', 'unknown'), ('no', 'no'), ('yes', 'yes')))
-    visual_impairment = EnumField(choices=(('unknown', 'unknown'), ('no', 'no'), ('yes', 'yes'), ('corrected', 'corrected')))
-    heart_impairment = EnumField(choices=(('unknown', 'unknown'), ('no', 'no'), ('yes', 'yes'), ('pacemaker', 'pacemaker')))
+    sex = EnumField(choices=(('unknown', 'unknown'),
+                             ('male', 'male'),
+                             ('female', 'female'),
+                             ('unspecified', 'unspecified')),
+                    default='unknown')
+    handedness = EnumField(choices=(('unknown', 'unknown'),
+                                    ('right', 'right'),
+                                    ('left', 'left'),
+                                    ('equal', 'equal')),
+                           default='unknown')
+    smoking = EnumField(choices=(('unknown', 'unknown'),
+                                 ('no', 'no'),
+                                 ('yes', 'yes')),
+                        default='unknown')
+    alcohol_abuse = EnumField(choices=(('unknown', 'unknown'),
+                                       ('no', 'no'),
+                                       ('yes', 'yes')),
+                              default='unknown')
+    drug_abuse = EnumField(choices=(('unknown', 'unknown'),
+                                    ('no', 'no'),
+                                    ('yes', 'yes')),
+                           default='unknown')
+    medication = EnumField(choices=(('unknown', 'unknown'),
+                                    ('no', 'no'),
+                                    ('yes', 'yes')),
+                           default='unknown')
+    visual_impairment = EnumField(choices=(('unknown', 'unknown'),
+                                           ('no', 'no'),
+                                           ('yes', 'yes'),
+                                           ('corrected', 'corrected')),
+                                  default='unknown')
+    heart_impairment = EnumField(choices=(('unknown', 'unknown'),
+                                          ('no', 'no'),
+                                          ('yes', 'yes'),
+                                          ('pacemaker', 'pacemaker')),
+                                 default='unknown')
 
     class Meta:
         db_table = u'subject'
@@ -163,7 +191,8 @@ class SubjectLog(models.Model):
     Some changes, e.g. to subject_detail_values, are auto-generated.
     """
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
-    # on_delete=models.CASCADE is the default. Note that this does not use the DBMS property but instead uses internal code.
+    # on_delete=models.CASCADE is the default. Note that this does not use the DBMS property but
+    # instead uses internal code.
     time = models.DateTimeField(null=True, blank=True, default=datetime.datetime.now)
     entry = models.TextField(blank=True)
 
@@ -250,8 +279,9 @@ class Datum(models.Model):
     def feature_values_dict(self):  # return a dict of detail values.
         return dict([(item.feature_type.name, item.value) for item in self._feature_values.all()])
 
-    def update_dfv(self,key,value):
-        new_dfv = DatumFeatureValue.objects.get_or_create(datum=self, feature_type=FeatureType.objects.get_or_create(name=key)[0])[0]
+    def update_dfv(self, key, value):
+        new_dfv = DatumFeatureValue.objects.get_or_create(
+            datum=self, feature_type=FeatureType.objects.get_or_create(name=key)[0])[0]
         new_dfv.value = value
         new_dfv.save()
         return value
@@ -260,7 +290,8 @@ class Datum(models.Model):
         return dict([(item.detail_type.name,item.value) for item in self._detail_values.all()])
 
     def update_ddv(self, key, value):
-        new_ddv = DatumDetailValue.objects.get_or_create(datum=self, detail_type=DetailType.objects.get_or_create(name=key)[0])[0]
+        new_ddv = DatumDetailValue.objects.get_or_create(
+            datum=self, detail_type=DetailType.objects.get_or_create(name=key)[0])[0]
         new_ddv.value = value
         new_ddv.save()
     # ===========================================================================
@@ -310,7 +341,7 @@ class DatumStore(models.Model):
         return u"%i samples x %i channels" % (self.n_samples, self.n_channels) if self.n_samples else "EMPTY"
 
     def get_data(self):
-        return np.frombuffer(self.erp).reshape((self.n_channels,self.n_samples))
+        return np.frombuffer(self.erp).reshape((self.n_channels, self.n_samples))
 
     def set_data(self, values):
         self.erp = values
