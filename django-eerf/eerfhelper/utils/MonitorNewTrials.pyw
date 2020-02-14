@@ -7,18 +7,18 @@ import os
 sys.path.append(os.path.abspath('d:/tools/eerf/python/eerf'))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "eerf.settings")
 from eerfd.models import *
-#from eerfx.online import *
+# from eerfx.online import *
 
-#===============================================================================
+# ===============================================================================
 # #http://stackoverflow.com/questions/3346124/how-do-i-force-django-to-ignore-any-caches-and-reload-data
 # from django.db import transaction
 # @transaction.commit_manually
-#===============================================================================
+# ===============================================================================
 
 class App:
     def __init__(self, master):
         
-        #master is the root
+        # master is the root
         self.frame = master
         plot_frame=Frame(self.frame)
         plot_frame.pack(side=TOP, fill=X)
@@ -40,14 +40,14 @@ class App:
         
     def update_plot(self):
         old_id = self.last_id if self.last_id else 0
-        #transaction.commit()
+        # transaction.commit()
         query = Datum.objects.filter(datum_id__gt=old_id).filter(span_type='trial').order_by('-datum_id')
         query.update()
         new_trial = query.all()[0] if query.count()>0 else None
         has_store = False
         try: has_store = np.any(new_trial.store)
         except: pass
-        if np.any(new_trial) and has_store: #If new trial, add the trial to the plot
+        if np.any(new_trial) and has_store:  # If new trial, add the trial to the plot
             tr_store=new_trial.store
             fig = self.fig
             x = tr_store.x_vec
@@ -93,8 +93,8 @@ class App:
         self.frame.after(500, self.update_plot)
         
 if __name__ == "__main__":
-    #engine = create_engine("mysql://root@localhost/eerat", echo=False)#echo="debug" gives a ton.
-    #Session = scoped_session(sessionmaker(bind=engine, autocommit=True))
-    root = Tk() #Creating the root widget. There must be and can be only one.
+    # engine = create_engine("mysql://root@localhost/eerat", echo=False)#echo="debug" gives a ton.
+    # Session = scoped_session(sessionmaker(bind=engine, autocommit=True))
+    root = Tk()  # Creating the root widget. There must be and can be only one.
     app = App(root)
-    root.mainloop() #Event loops
+    root.mainloop()  # Event loops

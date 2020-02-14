@@ -3,6 +3,7 @@ from django.db import models
 import datetime
 import numpy as np
 from eerfhelper import feature_functions
+import time
 
 
 # =========================
@@ -82,8 +83,10 @@ class CSVStringField(models.TextField):
     def get_db_prep_value(self, value, connection, prepared=False):
         if not value:
             return
-        return ', '.join(unicode(s) for s in value)
-    
+        # Removed "unicode" because was giving off error as undefined
+        # return ', '.join(unicode(s) for s in value)
+        return ', '.join(s for s in value)
+
     def value_to_string(self, obj):
         value = self._get_val_from_obj(obj)
         return self.get_db_prep_value(value)
@@ -168,7 +171,8 @@ class Subject(models.Model):
     # 
     # def get_or_create_recent_period(self,delay=9999):
     #    td = datetime.timedelta(hours=delay)
-    #    periods = self.data.filter(span_type=3).filter(stop_time__gte=django.utils.timezone.now()-td).order_by('-stop_time')
+    #    periods = \
+    #    self.data.filter(span_type=3).filter(stop_time__gte=django.utils.timezone.now()-td).order_by('-stop_time')
     #    if periods.count() > 0:
     #        return periods[0]
     #    else:
@@ -179,7 +183,8 @@ class Subject(models.Model):
         return dict([(item.detail_type.name, item.value) for item in self._detail_values.all()])
 
     def update_ddv(self, key, value):
-        new_sdv = SubjectDetailValue.objects.get_or_create(subject=self, detail_type=DetailType.objects.get_or_create(name=key)[0])[0]
+        new_sdv = SubjectDetailValue.objects.get_or_create(subject=self,
+                                                           detail_type=DetailType.objects.get_or_create(name=key)[0])[0]
         new_sdv.value = value
         new_sdv.save()
 
@@ -251,7 +256,8 @@ class Datum(models.Model):
     start_time = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
     stop_time = models.DateTimeField(blank=True, null=True, default=None)
     # ===========================================================================
-    # _detail_types = models.ManyToManyField(DetailType, through="DatumDetailValue", related_name="+")#no need for a detail_type to know ALL its values.
+    # _detail_types = models.ManyToManyField(DetailType, through="DatumDetailValue", related_name="+")
+    # #no need for a detail_type to know ALL its values.
     # _feature_types = models.ManyToManyField(FeatureType, through="DatumFeatureValue", related_name="+")
     # ===========================================================================
     trials = models.ManyToManyField("self",
@@ -267,10 +273,16 @@ class Datum(models.Model):
         
     def save(self):
         if self.number == 0:
-            sub_dat = Datum.objects.filter(subject=self.subject).filter(span_type=self.span_type).order_by('-number')[0]
-            self.number = sub_dat.number + 1 if sub_dat else 1
+            # sub_dat =
+            # Datum.objects.filter(subject=self.subject).filter(span_type=self.span_type).order_by('-number')[0]
+            # self.number = sub_dat[0].number + 1 if sub_dat else 1
+
+            # Fixed error when no data are present
+            sub_dat = Datum.objects.filter(subject=self.subject).filter(span_type=self.span_type).order_by('-number')
+            self.number = sub_dat[0].number + 1 if sub_dat else 1
         if not self.stop_time:
-            self.stop_time = (self.start_time + datetime.timedelta(seconds=1)) if self.span_type=='trial' else (self.start_time + datetime.timedelta(days=1))
+            self.stop_time = (self.start_time + datetime.timedelta(seconds=1)) \
+                if self.span_type == 'trial' else (self.start_time + datetime.timedelta(days=1))
         super(Datum, self).save()
         
     def __unicode__(self):

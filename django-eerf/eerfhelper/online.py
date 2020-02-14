@@ -142,11 +142,11 @@ class Datum:
 			for i in np.arange(len(trigdetect)):
 				ix = trigdetect[i]
 				dat = sig[:,ix+erpwin[0]:ix+erpwin[1]]
-				self.trials.append(Datum(subject_id=self.subject_id\
-                                            , datum_type_id=self.datum_type_id\
-                                            , span_type='trial'\
-                                            , parent_datum_id=self.datum_id\
-                                            , IsGood=1, Number=0))
+				self.trials.append(Datum(subject_id=self.subject_id,
+										 datum_type_id=self.datum_type_id,
+										 span_type='trial',
+										 parent_datum_id=self.datum_id,
+										 IsGood=1, Number=0))
 				my_trial=self.trials[-1]
 				my_trial.detail_values[intensity_detail_name]=str(states['StimulatorIntensity'][0,trig_ix[i]])
 				if int(bci_stream.params['ExperimentType']) == 1:#SICI intensity
