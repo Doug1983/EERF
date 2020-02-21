@@ -400,7 +400,7 @@ class DatumFeatureStore(models.Model):
 
 
 class DatumDetailValue(models.Model):
-    datum = models.ForeignKey(Datum, related_name = "_detail_values", on_delete=models.CASCADE)
+    datum = models.ForeignKey(Datum, related_name="_detail_values", on_delete=models.CASCADE)
     detail_type = models.ForeignKey(DetailType, on_delete=models.CASCADE)
     value = models.CharField(max_length=135, null=True, blank=True)
 

@@ -1,45 +1,52 @@
-#This is pretty old. I'm keeping it around because it has some useful snippets I will likely need.
+# This is pretty old. I'm keeping it around because it has some useful snippets I will likely need.
 import numpy as np
 import time, os, datetime
 from scipy.optimize import curve_fit
-#from EERF.API import *
-#from sqlalchemy.orm import query
-#from sqlalchemy import desc
+# from EERF.API import *
+# from sqlalchemy.orm import query
+# from sqlalchemy import desc
 import BCPy2000.BCI2000Tools.FileReader as FileReader
 from matplotlib.mlab import find
 
-#sigmoid function used for fitting response data
+
+# sigmoid function used for fitting response data
 def my_sigmoid(x, x0, k, a, c): return a / (1 + np.exp(-1*k*(x-x0))) + c
-#x0 = half-max, k = slope, a = max, c = min
+
+
+# x0 = half-max, k = slope, a = max, c = min
 def my_simp_sigmoid(x, x0, k): return 1 / (1 + np.exp(-1*k*(x-x0)))
-	
-#Calculate and return _halfmax and _halfmax err
+
+
+# Calculate and return _halfmax and _halfmax err
 def model_sigmoid(x,y, mode=None):
-	#Fit a sigmoid to those values for trials in this period.
+	# Fit a sigmoid to those values for trials in this period.
 	n_trials = x.shape[0]
-	if n_trials>4:
-		if not mode or mode=='halfmax':
+	if n_trials > 4:
+		if not mode or mode == 'halfmax':
 			sig_func = my_sigmoid
-			p0=(np.median(x),0.1,np.max(y)-np.min(y),np.min(y)) #x0, k, a, c
+			p0=(np.median(x),0.1,np.max(y)-np.min(y),np.min(y))  # x0, k, a, c
 			nvars = 4
-		elif mode=="threshold":
+		elif mode == "threshold":
 			sig_func = my_simp_sigmoid
-			p0=(np.median(x),0.1) #x0, k
+			p0 = (np.median(x),0.1)  # x0, k
 			nvars = 2
-		try: popt, pcov = curve_fit(sig_func, x, y, p0=p0)
+		try:
+			popt, pcov = curve_fit(sig_func, x, y, p0=p0)
 		except RuntimeError:
 			print("Error - curve_fit failed")
 			popt=np.empty((nvars,))
 			popt.fill(np.NAN)
-			pcov = np.Inf #So the err is set to nan
-		#popt = x0, k, a, c
-		#diagonal pcov is variance of parameter estimates.
+			pcov = np.Inf  # So the err is set to nan
+		# popt = x0, k, a, c
+		# diagonal pcov is variance of parameter estimates.
 		if np.isinf(pcov).all():
-			perr=np.empty((nvars,))
+			perr = np.empty((nvars,))
 			perr.fill(np.NAN)
-		else: perr = np.sqrt(pcov.diagonal())
+		else:
+			perr = np.sqrt(pcov.diagonal())
 		return popt,perr
-	
+
+
 def _recent_stream_for_dir(dir, maxdate=None):
 		dir=os.path.abspath(dir)
 		files=FileReader.ListDatFiles(d=dir)
