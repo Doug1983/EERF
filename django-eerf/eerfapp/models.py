@@ -352,8 +352,8 @@ class DatumStore(models.Model):
     def __unicode__(self):
         return u"%i samples x %i channels" % (self.n_samples, self.n_channels) if self.n_samples else "EMPTY"
 
-    def get_data(self):
-        return np.frombuffer(self.erp).reshape((self.n_channels, self.n_samples))
+    def get_data(self, dtype=np.float):
+        return np.frombuffer(self.erp, dtype=dtype).reshape((self.n_channels, self.n_samples))
 
     def set_data(self, values):
         self.erp = values
@@ -389,8 +389,8 @@ class DatumFeatureStore(models.Model):
     def __unicode__(self):
         return u"%i features x %i channels" % (self.n_features, self.n_channels) if self.n_channels else "EMPTY"
 
-    def get_data(self):
-        return np.frombuffer(self.dat_array).reshape((self.n_channels, self.n_features))
+    def get_data(self, dtype=np.float):
+        return np.frombuffer(self.dat_array, dtype=dtype).reshape((self.n_channels, self.n_features))
 
     def set_data(self, values):
         self.dat_array = values
